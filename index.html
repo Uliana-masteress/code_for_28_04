@@ -47,9 +47,9 @@
         document.getElementById('sendToBot').addEventListener('click', function() {
             const userText = document.getElementById('userText').value;
             if (userText.trim() !== '') {
-                // Обратите внимание на обратные кавычки (backticks) здесь
-                let botUrl = https://t.me/code_28_04_bot?start=${encodeURIComponent(userText)};
-                tg.openTelegramLink(botUrl); // рекомендуется использовать openTelegramLink вместо openLink
+                // Исправлено: добавлены обратные кавычки
+                let botUrl = `https://t.me/code_28_04_bot?start=${encodeURIComponent(userText)}`;
+                tg.openTelegramLink(botUrl);
             } else {
                 alert('Пожалуйста, введите текст!');
             }
