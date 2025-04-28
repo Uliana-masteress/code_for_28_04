@@ -1,497 +1,59 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Онлайн магазин</title>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Телеграм мини-приложение</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        * {
-            box-sizing: border-box;
-            font-family: -apple-system, sans-serif;
-            margin: 0;
-            padding: 0;
-        }
-
-        body {
-            background: #f8f8f8;
-        }
-
-        .header {
-            padding: 15px;
-            background: white;
-            border-bottom: 1px solid #e0e0e0;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-
-        .user-info {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 15px;
-            font-size: 16px;
-        }
-
-        .tabs {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 15px;
-        }
-
-        .tab {
-            padding: 8px 20px;
-            border-radius: 20px;
-            background: #fff;
-            border: 1px solid #007AFF;
-            color: #007AFF;
-            cursor: pointer;
-            font-size: 14px;
-        }
-
-        .tab.active {
-            background: #007AFF;
-            color: white;
-        }
-
-        .category-grid {
-            display: grid;
-            gap: 15px;
-            padding: 15px;
-            grid-template-columns: repeat(2, 1fr);
-        }
-
-        .category-card {
-            background: linear-gradient(135deg, #f0e600, #f0e600);
-            border-radius: 12px;
+        body { 
+            font-family: Arial, sans-serif; 
             padding: 20px;
-            color: white;
-            text-align: center;
-            min-height: 120px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            cursor: pointer;
+            color: var(--tg-theme-text-color);
+            background: var(--tg-theme-bg-color);
         }
-
-        .products-grid {
-            padding: 15px;
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
         }
-
-        .product-card {
-            background: white;
-            border-radius: 12px;
-            padding: 10px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            cursor: pointer;
-        }
-
-        .product-image {
+        textarea {
             width: 100%;
-            height: 180px;
-            object-fit: cover;
+            padding: 10px;
+            margin-bottom: 15px;
             border-radius: 8px;
-            margin-bottom: 10px;
         }
-
-        .price-container {
-            margin: 10px 0;
-        }
-
-        .current-price {
-            color: #FF3B30;
-            font-weight: bold;
-            font-size: 16px;
-        }
-
-        .old-price {
-            color: #888;
-            text-decoration: line-through;
-            font-size: 12px;
-        }
-
-        .product-modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0,0,0,0.5);
-            padding: 20px;
-            overflow-y: auto;
-            z-index: 1000;
-        }
-
-        .modal-content {
-            background: white;
-            border-radius: 12px;
-            padding: 20px;
-            position: relative;
-        }
-
-        .size-selector {
-            display: flex;
-            gap: 10px;
-            margin: 15px 0;
-            flex-wrap: wrap;
-        }
-
-        .size-btn {
-            padding: 8px 15px;
-            border: 1px solid #ddd;
-            border-radius: 20px;
-            background: white;
-            cursor: pointer;
-        }
-
-        .size-btn.selected {
-            background: #007AFF;
-            color: white;
-            border-color: #007AFF;
-        }
-
-        .back-button {
-            padding: 10px;
-            margin: 15px;
-            border: none;
-            background: none;
-            cursor: pointer;
-            color: #007AFF;
-        }
-
-        .size-table {
-            width: 100%;
-            margin: 15px 0;
-            border-collapse: collapse;
-        }
-        .size-table td, .size-table th {
-            border: 1px solid #ddd;
-            padding: 8px;
-            text-align: center;
-        }
-        .color-indicator {
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            display: inline-block;
-            margin-right: 5px;
-        }
-        .product-details-section {
-            margin: 15px 0;
-            border-top: 1px solid #eee;
-            padding-top: 10px;
-        }
-        .add-to-cart {
-            background: #34C759;
+        button {
+            background-color: #0088cc;
             color: white;
             border: none;
-            padding: 10px;
+            padding: 10px 15px;
             border-radius: 8px;
-            font-weight: bold;
             cursor: pointer;
-            transition: background 0.3s;
-        }
-        
-        .add-to-cart:hover {
-            background: #2DAE4F;
+            font-size: 16px;
         }
     </style>
 </head>
 <body>
-    <div id="app"></div>
+    <div class="container">
+        <h2>Введите текст</h2>
+        <textarea id="userText" rows="5" placeholder="Напишите что-нибудь..."></textarea>
+        <button id="sendToBot">Телеграмм бот</button>
+    </div>
+
     <script>
-        const products = {
-            'shorts': [
-                { 
-                    id: 1,
-                    name: 'Мужские шорты AWSM',
-                    price: 2499,
-                    oldPrice: 3999,
-                    photos: ['https://basket-21.wbbasket.ru/vol3670/part367026/367026012/images/c246x328/1.webp'],
-                    desc: 'Удобные, стильные мужские черные трикотажные шорты идеально подойдут для активного ношения в повседневной жизни. Идеальное качество это правило нашего бренда! Модель бермуды бренда AWSM выполнена из приятной телу ткани.',
-                    sizes: ['S', 'M', 'L', 'XL'],
-                    composition: '100% хлопок',
-                    color: 'Черный'
-                }
-            ],
-            'tshirts': [
-                {
-                    id: 2,
-                    name: 'Футболка FILA',
-                    price: 1149,
-                    oldPrice: 2299,
-                    photos: ['https://basket-16.wbbasket.ru/vol2424/part242457/242457132/images/c246x328/1.webp'],
-                    desc: 'Женская футболка премиум-класса',
-                    sizes: ['XS', 'S', 'M'],
-                    composition: 'Полиэстер 95%, Эластан 5%',
-                    color: 'Белый'
-                }
-            ],
-            'hoodies': [
-                {
-                    id: 3,
-                    name: 'Худи Oversize',
-                    price: 5999,
-                    photos: ['https://basket-20.wbbasket.ru/vol3425/part342585/342585984/images/c246x328/1.webp'],
-                    desc: 'Модное худи свободного кроя',
-                    sizes: ['M', 'L', 'XL'],
-                    composition: 'Хлопок 80%, Полиэстер 20%',
-                    color: 'Серый'
-                }
-            ]
-        };
-
-        let cart = JSON.parse(localStorage.getItem('cart')) || [];
-        let currentView = 'main';
-        let currentTab = 'categories';
-        let selectedProduct = null;
-        let selectedSize = null;
-
-        function renderMain() {
-            const html = `
-                <div class="header">
-                    <div class="user-info">
-                        <div>Привет, Ульяна<br><small>Москва</small></div>
-                        <button>Q</button>
-                    </div>
-                    
-                    <div class="tabs">
-                        <div class="tab ${currentTab === 'categories' ? 'active' : ''}" 
-                             onclick="switchTab('categories')">Разделы</div>
-                        <div class="tab ${currentTab === 'catalog' ? 'active' : ''}" 
-                             onclick="switchTab('catalog')">Каталог</div>
-                    </div>
-                </div>
-                
-                ${currentTab === 'categories' ? renderCategories() : renderCatalog()}
-            `;
-            document.getElementById('app').innerHTML = html;
-        }
-
-        function renderCart() {
-            const items = cart.map(item => `
-                <div class="cart-item">
-                    <h3>${item.name}</h3>
-                    <p>Цвет: ${item.color}</p>
-                    <p>Размер: ${item.size}</p>
-                    <div class="price-container">
-                        <div class="current-price">${item.price} ₽</div>
-                        ${item.oldPrice ? `<div class="old-price">${item.oldPrice} ₽</div>` : ''}
-                    </div>
-                    <hr>
-                </div>
-            `).join('');
-
-            const total = cart.reduce((sum, item) => sum + item.price, 0);
-            
-            const html = `
-                <div class="header">
-                    <div class="user-info">
-                        <div>Корзина</div>
-                    </div>
-                </div>
-                <button class="back-button" onclick="goBack()">← Назад</button>
-                ${items}
-                <div class="total-section">
-                    <h3>Итого: ${total} ₽</h3>
-                    <button class="checkout-btn" onclick="checkout()">Продолжить оформление</button>
-                </div>
-            `;
-            document.getElementById('app').innerHTML = html;
-        }
+        let tg = window.Telegram.WebApp;
+        tg.expand();
         
-        function pay() {
-            const order = cart.map(item => `${item.name} (${item.size}) - ${item.price} ₽`).join('\n');
-            Telegram.WebApp.openTelegramLink(`https://t.me/code_18_04_bot?start=${encodeURIComponent(order)}`);
-        }
-
-        function checkout() {
-            const message = `Заказ:\n${cart.map(item => 
-                `${item.name} (${item.size}) - ${item.price} ₽`
-            ).join('\n')}\n\nИтого: ${cart.reduce((sum, item) => sum + item.price, 0)} ₽`;
-            
-            Telegram.WebApp.openTelegramLink(`https://t.me/code_18_04_bot?start=${encodeURIComponent(message)}`);
-        }
-
-        function getColorCode(color) {
-            const colors = {
-                'Черный': '#000000',
-                'Белый': '#ffffff',
-                'Серый': '#808080'
-            };
-            return colors[color] || '#cccccc';
-        }
-
-
-        function renderCategories() {
-            return `
-                <div class="category-grid">
-                    <div class="category-card" onclick="showCategory('shorts')">
-                        <h3>Шорты</h3>
-                    </div>
-                    <div class="category-card" onclick="showCategory('tshirts')">
-                        <h3>Футболки</h3>
-                    </div>
-                    <div class="category-card" onclick="showCategory('hoodies')">
-                        <h3>Худи</h3>
-                    </div>
-                </div>
-            `;
-        }
-
-        function showCategory(category) {
-            currentView = 'category';
-            const items = products[category].map(item => `
-                <div class="product-card">
-                    <div onclick="showProduct(${JSON.stringify(item)})">
-                        <img src="${item.photos[0]}" class="product-image">
-                        <h4>${item.name}</h4>
-                        <div class="price-container">
-                            <div class="current-price">${item.price} ₽</div>
-                            ${item.oldPrice ? `<div class="old-price">${item.oldPrice} ₽</div>` : ''}
-                        </div>
-                    </div>
-                    <button class="add-to-cart" 
-                            onclick="showProduct(${JSON.stringify(item)})" 
-                            style="width: 100%; margin-top: 10px; padding: 8px; background: #34C759; color: white; border: none; border-radius: 8px;">
-                        В корзину
-                    </button>
-                </div>
-            `).join('');
-
-            const html = `
-                <div class="header">
-                    <div class="user-info">
-                        <div>Привет, Ульяна<br><small>Москва</small></div>
-                        <button>Q</button>
-                    </div>
-                </div>
-                <button class="back-button" onclick="goBack()">← Назад</button>
-                <div class="products-grid">${items}</div>
-            `;
-            
-            document.getElementById('app').innerHTML = html;
-        }
-
-        function renderCatalog() {
-            const allProducts = Object.values(products).flat();
-            const items = allProducts.map(item => `
-                <div class="product-card">
-                    <div onclick="showProduct(${JSON.stringify(item)})">
-                        <img src="${item.photos[0]}" class="product-image">
-                        <h4>${item.name}</h4>
-                        <div class="price-container">
-                            <div class="current-price">${item.price} ₽</div>
-                            ${item.oldPrice ? `<div class="old-price">${item.oldPrice} ₽</div>` : ''}
-                        </div>
-                    </div>
-                    <button class="add-to-cart" 
-                            onclick="showProduct(${JSON.stringify(item)})" 
-                            style="width: 100%; margin-top: 10px; padding: 8px; background: #34C759; color: white; border: none; border-radius: 8px;">
-                        В корзину
-                    </button>
-                </div>
-            `).join('');
-
-            return `
-                <button class="back-button" onclick="goBack()">← Назад</button>
-                <div class="products-grid">${items}</div>
-            `;
-        }
-
-       function showProduct(product) {
-            selectedProduct = product;
-            selectedSize = null;
-            const html = `
-                <div class="product-modal">
-                    <div class="modal-content">
-                        <button onclick="closeModal()" style="float: right; background: none; border: none; font-size: 24px">×</button>
-                        <img src="${product.photos[0]}" class="product-image">
-                        <h2>${product.name}</h2>
-                        
-                        <div class="price-container">
-                            <div class="current-price">${product.price} ₽</div>
-                            ${product.oldPrice ? `<div class="old-price">${product.oldPrice} ₽</div>` : ''}
-                        </div>
-
-                        <div class="product-details-section">
-                            <div><span class="color-indicator" style="background: ${getColorCode(product.color)}"></span>${product.color}</div>
-                        </div>
-
-                        <div class="product-details-section">
-                            <h3>Размеры</h3>
-                            <div class="size-selector">
-                                ${product.sizes.map(size => `
-                                    <button class="size-btn" 
-                                            onclick="selectSize('${size}')">${size}</button>
-                                `).join('')}
-                            </div>
-                        </div>
-
-                        <div class="product-details-section">
-                            <h3>Описание</h3>
-                            <p>${product.desc}</p>
-                        </div>
-
-                        <div class="product-details-section">
-                            <h3>Состав</h3>
-                            <p>${product.composition}</p>
-                        </div>
-
-                        <button class="add-to-cart" 
-                                onclick="addToCart()" 
-                                style="width: 100%; margin-top: 20px; padding: 15px; background: #007AFF; color: white; border: none; border-radius: 10px; font-size: 16px">
-                            В корзину
-                        </button>
-                    </div>
-                </div>
-            `;
-            document.body.insertAdjacentHTML('beforeend', html);
-        }
-
-        function selectSize(size) {
-            selectedSize = size;
-            document.querySelectorAll('.size-btn').forEach(btn => {
-                btn.classList.toggle('selected', btn.textContent === size);
-            });
-        }
-
-        function addToCart() {
-            if (!selectedSize) return alert('Выберите размер!');
-            cart.push({
-                ...selectedProduct,
-                size: selectedSize,
-                quantity: 1
-            });
-            localStorage.setItem('cart', JSON.stringify(cart));
-            closeModal();
-            renderCart(); 
-        }
-
-        function closeModal() {
-            const modal = document.querySelector('.product-modal');
-            if (modal) modal.remove();
-            selectedProduct = null;
-            selectedSize = null;
-        }
-
-        function switchTab(tab) {
-            currentTab = tab;
-            renderMain();
-        }
-
-        function goBack() {
-            currentView = 'main';
-            renderMain();
-        }
-
-        // Инициализация приложения
-        Telegram.WebApp.ready();
-        renderMain();
+        document.getElementById('sendToBot').addEventListener('click', function() {
+            const userText = document.getElementById('userText').value;
+            if (userText.trim() !== '') {
+                // Сохраняем текст в начальных данных для бота
+                let botUrl = https://t.me/ваш_бот_username?start=${encodeURIComponent(userText)};
+                tg.openLink(botUrl);
+            } else {
+                alert('Пожалуйста, введите текст!');
+            }
+        });
     </script>
 </body>
 </html>
