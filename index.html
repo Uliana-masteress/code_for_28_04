@@ -23,7 +23,7 @@
             border-radius: 8px;
         }
         button {
-            background-color: #cc0088;
+            background-color: #00cc88;
             color: white;
             border: none;
             padding: 10px 15px;
@@ -48,7 +48,7 @@
             const userText = document.getElementById('userText').value;
             if (userText.trim() !== '') {
                 // Сохраняем текст в начальных данных для бота
-                let botUrl = https://t.me/code_28_04_bot/myapp?start=${encodeURIComponent(userText)};
+                let botUrl = https://t.me/code_28_04_bot?start=${encodeURIComponent(userText)};
                 tg.openLink(botUrl);
             } else {
                 alert('Пожалуйста, введите текст!');
